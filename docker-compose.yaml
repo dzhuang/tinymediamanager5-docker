@@ -2,7 +2,7 @@ version: '3'
 
 services:
   tinymediamanager_service:
-    image: dzhuang/tinymediamanager-docker:v5-latest
+    image: dzhuang/tinymediamanager:latest-v5
     container_name: tinymediamanager-v5
     ports:
       - 5800:5800
@@ -14,3 +14,13 @@ services:
       GROUP_ID: 1000
       USER_ID: 0
       TZ: Asia/Hong_Kong
+
+  # Enable image/container auto update
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: Asia/Shanghai
+    command: --interval 3600 tinymediamanager-v5 --cleanup

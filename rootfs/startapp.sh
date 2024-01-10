@@ -20,7 +20,7 @@ getpid_tmm() {
         fi
     fi
     if [ "$PID" = "UNSET" ]; then
-        PID="$(ps -o pid,args | grep -w "tmm.jar" | grep -vw grep | tr -s ' ' | cut -d' ' -f2)"
+        PID="$(ps -o pid,args | grep -w "/config/tinyMediaManager" | grep -vw grep | tr -s ' ' | cut -d' ' -f2)"
     fi
     echo "${PID:-UNSET}"
 }
