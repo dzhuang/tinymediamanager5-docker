@@ -10,6 +10,7 @@ services:
     volumes:
       - ./config:/config
       - ./media:/media
+      - ./share:/.local/share
     environment:
       GROUP_ID: 1000
       USER_ID: 0
