@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  tinymediamanager_service:
+    image: dzhuang/tinymediamanager-docker:v5-latest
+    container_name: tinymediamanager-v5
+    ports:
+      - 5800:5800
+      - 5900:5900
+    volumes:
+      - ./config:/config
+      - ./media:/media
+    environment:
+      GROUP_ID: 1000
+      USER_ID: 0
+      TZ: Asia/Hong_Kong
