@@ -15,7 +15,7 @@ Before upgrading from an older version (e.g., 3.x to 4.x, 3.x to 5.x, or 4.x to 
 
 ## Why Choose This Over the Official Docker Image?
 
-Our Docker image, meticulously crafted in this repository, is significantly more compact than the official Docker images. This leaner size leads to reduced system resource consumption, offering users a more efficient and streamlined experience. Opt for this image if you prioritize optimal resource management and performance in your system.
+Our Docker image, is significantly more compact than the official Docker images (150M vs. 300M+ as image, 230M vs. 800M when extracted). This leaner size leads to reduced system resource consumption, offering users a more efficient and streamlined experience. Opt for this image if you prioritize optimal resource management and performance in your system.
 
 ## Features
 - Out-of-the-box support for Chinese and Japanese fonts (中文支持开箱即用).
