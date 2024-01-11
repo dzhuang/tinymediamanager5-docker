@@ -1,28 +1,36 @@
 # tinymediamanager5-docker
 
-A repository for creating a docker container including TinyMediaManager with GUI interface (**with Chinese and Japanese fonts**).
+
+### [中文说明](https://github.com/dzhuang/tinymediamanager5-docker/wiki/%E4%B8%AD%E6%96%87%E8%AF%B4%E6%98%8E)
+
+This repository is dedicated to creating a Docker container featuring TinyMediaManager with a GUI interface, enhanced with both Chinese and Japanese font support.
 
 ```bash
 docker pull dzhuang/tinymediamanager:latest-v5
 ```
 
+### Important Notice for Version Upgrades
 
-## modification to the original repo
-- Add Chinese and Japanese fonts support out of the box (中文支持开箱即用)
-- Quick fix for [bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13) that image change did not result in changes of version in running containers . Need to test if version change between v3 and v4 works and will submit PR to original repo. (修复image升级/变化后，容器实际运行的tmm版本未变化的[bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13)，跨V3和V4的版本切换未测试，请谨慎使用)
-- Demo docker compose file that enable container auto upgrade (支持自动升级版本的docker compose示例文件).
+Before upgrading from an older version (e.g., 3.x to 4.x, 3.x to 5.x, or 4.x to 5.x), it is imperative to safeguard your configuration settings. Please ensure you have backed up your `/config` directory thoroughly. This precaution is essential to protect your settings and preferences during the upgrade process.
 
-The build also fixes the version not updated issue of the 
-To use this build, please use `dzhuang/tinymediamanager:v5-latest`.
+## Why Choose This Over the Official Docker Image?
 
+Our Docker image, meticulously crafted in this repository, is significantly more compact than the official Docker images. This leaner size leads to reduced system resource consumption, offering users a more efficient and streamlined experience. Opt for this image if you prioritize optimal resource management and performance in your system.
+
+## Features
+- Out-of-the-box support for Chinese and Japanese fonts (中文支持开箱即用).
+- A quick resolution for the [bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13) where changes in the image version did not reflect in running containers. (修复image升级/变化后，容器实际运行的tmm版本未变化的[bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13)).
+- A demonstrative Docker Compose file enabling container auto-upgrades (支持自动升级版本的docker compose示例文件).
+
+For utilizing this build, use `dzhuang/tinymediamanager:v5-latest`.
 
 Instructions:
-- Map any local port to 5800 for web access
-- Map any local port to 5900 for VNC access
-- Map a local volume to /config (Stores configuration data)
-- Map a local volume to /media (Access media files)
+- Map any local port to 5800 for web access.
+- Map any local port to 5900 for VNC access.
+- Map a local volume to `/config` to store configuration data.
+- Map a local volume to `/media` for accessing media files.
 
-Sample run command:
+Sample Run Command:
 
 ```bash
 docker run -d --name=tinymediamanager \
@@ -33,8 +41,3 @@ docker run -d --name=tinymediamanager \
 -p 5900:5900 \
 dzhuang/tinymediamanager:v5-latest
 ```
-
-## Update from v4
-
-Make sure the v4 `config/data` directory is mapped and can be accesses from the new version, and when “Tools -> Import data/settings from another v4 installation”, and select that
-folder. 
