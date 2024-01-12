@@ -1,20 +1,27 @@
 #
 # TinyMediaManager Dockerfile
 #
-FROM jlesage/baseimage-gui:alpine-3.12-glibc
+FROM jlesage/baseimage-gui:alpine-3.15
 
 # Define software versions.
 ARG TMM_VERSION=5.0
 
 # Define software download URLs.
-ARG TMM_URL=https://release.tinymediamanager.org/v5/dist/tinyMediaManager-${TMM_VERSION}-linux-amd64.tar.xz
+ARG TMM_URL=https://release.tinymediamanager.org/v5/dist/tinyMediaManager-${TMM_VERSION}-linux-arm64.tar.xz
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jre/bin
 
 # Define working directory.
 WORKDIR /tmp
 
 # Download TinyMediaManager
+
+COPY glibc-bin-2.38-0-aarch64.tar.gz /tmp
+
+
 RUN \
+    tar -xzvf glibc-bin-2.38-0-aarch64.tar.gz -C /tmp/ && \
+    cp -r usr/* /usr && \
+    ls /usr/glibc-compat/lib && \
     mkdir -p /defaults && \
     wget ${TMM_URL} -O /defaults/tmm.tar.xz
 
@@ -28,11 +35,12 @@ RUN \
         tar \
       	zstd \
       fontconfig \
-      ttf-dejavu
+      ttf-dejavu \
+      xz
 
 
 # Fix Java Segmentation Fault
-RUN wget "https://www.archlinux.org/packages/core/x86_64/zlib/download" -O /tmp/libz.tar.xz \
+RUN wget "http://mirror.archlinuxarm.org/aarch64/core/zlib-1:1.3-2-aarch64.pkg.tar.xz" -O /tmp/libz.tar.xz \
     && mkdir -p /tmp/libz \
     && tar -xf /tmp/libz.tar.xz -C /tmp/libz \
     && cp /tmp/libz/usr/lib/libz.so.1.3 /usr/glibc-compat/lib \
