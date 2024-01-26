@@ -35,7 +35,7 @@ RUN \
 RUN wget "https://www.archlinux.org/packages/core/x86_64/zlib/download" -O /tmp/libz.tar.xz \
     && mkdir -p /tmp/libz \
     && tar -xf /tmp/libz.tar.xz -C /tmp/libz \
-    && cp /tmp/libz/usr/lib/libz.so.1.3 /usr/glibc-compat/lib \
+    && cp /tmp/libz/usr/lib/libz.so.1.3.1 /usr/glibc-compat/lib \
     && /usr/glibc-compat/sbin/ldconfig \
     && rm -rf /tmp/libz /tmp/libz.tar.xz
 
