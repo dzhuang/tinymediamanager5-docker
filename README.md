@@ -27,7 +27,7 @@ Our Docker image, is significantly more compact than the official Docker images 
 - A quick resolution for the [bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13) where changes in the image version did not reflect in running containers. (修复image升级/变化后，容器实际运行的tmm版本未变化的[bug](https://github.com/dzhuang/tinymediamanager-docker/issues/13)).
 - A demonstrative Docker Compose file enabling container auto-upgrades (支持自动升级版本的docker compose示例文件).
 
-For utilizing this build, use `dzhuang/tinymediamanager:v5-latest`.
+For utilizing this build, use `dzhuang/tinymediamanager:latest-v5`.
 
 Instructions:
 - Map any local port to 5800 for web access.
