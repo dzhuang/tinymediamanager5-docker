@@ -44,5 +44,5 @@ docker run -d --name=tinymediamanager \
 -e GROUP_ID=0 -e USER_ID=0 -e TZ=Europe/Madrid \
 -p 5800:5800 \
 -p 5900:5900 \
-dzhuang/tinymediamanager:v5-latest
+dzhuang/tinymediamanager:latest-v5
 ```
