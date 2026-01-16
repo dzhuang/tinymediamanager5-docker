@@ -30,7 +30,7 @@ is_tmm_running() {
 }
 
 start_tmm() {
-        /config/tinyMediaManager > /config/logs/output.log 2>&1 &
+    /config/tinyMediaManager > /config/logs/output.log 2>&1 &
 }
 
 kill_tmm() {

@@ -1,10 +1,11 @@
 #
 # TinyMediaManager Dockerfile
 #
+# Note: Using alpine-3.12-glibc for glibc support required by TinyMediaManager binaries
 FROM jlesage/baseimage-gui:alpine-3.12-glibc
 
 # Define software versions.
-ARG TMM_VERSION=5.0
+ARG TMM_VERSION=5.2.4
 
 # Define software download URLs.
 ARG TMM_URL=https://release.tinymediamanager.org/v5/dist/tinyMediaManager-${TMM_VERSION}-linux-amd64.tar.xz
@@ -19,25 +20,14 @@ RUN \
     wget ${TMM_URL} -O /defaults/tmm.tar.xz
 
 # Install dependencies.
-RUN \
-    apk add --update \
-        libmediainfo \
-        ttf-dejavu \
-        bash \
-	    zenity \
-        tar \
-      	zstd \
-      fontconfig \
-      ttf-dejavu
+RUN apk add --no-cache libmediainfo ttf-dejavu bash zenity tar zstd fontconfig xz
 
 
-# Fix Java Segmentation Fault
-RUN wget "https://www.archlinux.org/packages/core/x86_64/zlib/download" -O /tmp/libz.tar.xz \
-    && mkdir -p /tmp/libz \
-    && tar -xf /tmp/libz.tar.xz -C /tmp/libz \
-    && cp /tmp/libz/usr/lib/libz.so.1.3.1 /usr/glibc-compat/lib \
-    && /usr/glibc-compat/sbin/ldconfig \
-    && rm -rf /tmp/libz /tmp/libz.tar.xz
+# Fix Java Segmentation Fault on alpine-3.12-glibc
+# Use Alpine's zlib instead of downloading from Arch (which may be too new)
+RUN apk add --no-cache zlib && \
+    cp /lib/libz.so.1* /usr/glibc-compat/lib/ && \
+    /usr/glibc-compat/sbin/ldconfig
 
 # Maximize only the main/initial window.
 # It seems this is not needed for TMM 3.X version.
@@ -46,9 +36,11 @@ RUN wget "https://www.archlinux.org/packages/core/x86_64/zlib/download" -O /tmp/
 #        /etc/xdg/openbox/rc.xml
 
 # Generate and install favicons.
-RUN \
-    APP_ICON_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/raw/45f9c702615a55725a508523b0524166b188ff75/AppBundler/tmm.png && \
-    install_app_icon.sh "$APP_ICON_URL"
+# Note: Commented out as the GitLab URL may be inaccessible or cause build failures.
+# If you need a custom icon, uncomment and update the URL to a reliable source.
+# RUN \
+#     APP_ICON_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/raw/45f9c702615a55725a508523b0524166b188ff75/AppBundler/tmm.png && \
+#     install_app_icon.sh "$APP_ICON_URL"
 
 
 # Install Chinese fonts
@@ -63,6 +55,12 @@ RUN wget -O /tmp/font.tar.gz http://downloads.sourceforge.net/wqy/wqy-zenhei-0.9
 COPY rootfs/ /
 COPY VERSION /
 
+# Fix line endings (CRLF -> LF) and set execute permissions for scripts
+# This is needed when building on Windows
+RUN find /etc/cont-init.d -type f -exec sed -i 's/\r$//' {} \; && \
+    find /etc/cont-init.d -type f -exec chmod +x {} \; && \
+    if [ -f /startapp.sh ]; then sed -i 's/\r$//' /startapp.sh && chmod +x /startapp.sh; fi
+
 # Set environment variables.
 ENV APP_NAME="TinyMediaManager" \
     S6_KILL_GRACETIME=8000
@@ -73,8 +71,8 @@ VOLUME ["/media"]
 
 # Metadata.
 LABEL \
-      org.label-schema.name="tinymediamanager" \
-      org.label-schema.description="Docker container for TinyMediaManager" \
-      org.label-schema.version="unknown" \
-      org.label-schema.vcs-url="https://github.com/dzhuang/tinymediamanager5-docker" \
-      org.label-schema.schema-version="1.0"
+    org.label-schema.name="tinymediamanager" \
+    org.label-schema.description="Docker container for TinyMediaManager" \
+    org.label-schema.version="unknown" \
+    org.label-schema.vcs-url="https://github.com/dzhuang/tinymediamanager5-docker" \
+    org.label-schema.schema-version="1.0"
