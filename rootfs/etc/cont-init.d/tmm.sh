@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/with-contenv sh
 
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error.
@@ -17,11 +17,6 @@ if [ ! -f /config/tmm.jar ] || [ ! -f /config/tmm.tar.xz ] || ! cmp /defaults/tm
 fi
 
 # Take ownership of the config directory content.
-# Use default values if USER_ID/GROUP_ID are not set
-USER_ID="${USER_ID:-1000}"
-GROUP_ID="${GROUP_ID:-1000}"
-export USER_ID
-export GROUP_ID
 chown -R $USER_ID:$GROUP_ID /config/*
 
 # Take ownership of the output directory.
