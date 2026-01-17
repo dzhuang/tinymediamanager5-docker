@@ -5,7 +5,10 @@ on:
       tmmVersion:
         description: 'Version of tmm.jar'
         required: true
-        default: '5.0'
+        default: '5.2.4'
+  push:
+    branches:
+      - test
 
 jobs:
   build:
@@ -23,6 +26,7 @@ jobs:
         with:
           context: .
           build-args: |
-            TMM_VERSION=${{ github.event.inputs.tmmVersion }}
-          tags: dzhuang/tinymediamanager:v${{ github.event.inputs.tmmVersion }}
+            TMM_VERSION=${{ github.event.inputs.tmmVersion || '5.2.4' }}
+          tags: |
+            dzhuang/tinymediamanager:${{ github.event.inputs.tmmVersion || 'test' }}
           push: true

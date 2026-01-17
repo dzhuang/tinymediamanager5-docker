@@ -1,49 +1,39 @@
 #
 # TinyMediaManager Dockerfile
 #
-# Note: Using alpine-3.12-glibc for glibc support required by TinyMediaManager binaries
-FROM jlesage/baseimage-gui:alpine-3.12-glibc
+# 注意：使用 alpine-3.22-v4 并手动安装 glibc 以支持 TinyMediaManager 的 glibc 依赖
+FROM jlesage/baseimage-gui:alpine-3.22-v4
 
-# Define software versions.
-ARG TMM_VERSION=5.2.4
+# 定义软件版本
+ARG TMM_VERSION=5.2.5
 
-# Define software download URLs.
+# 定义软件下载 URL
 ARG TMM_URL=https://release.tinymediamanager.org/v5/dist/tinyMediaManager-${TMM_VERSION}-linux-amd64.tar.xz
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jre/bin
 
-# Define working directory.
+# 定义工作目录
 WORKDIR /tmp
 
-# Download TinyMediaManager
+# 安装 glibc 兼容层 (sgerrand)
+RUN apk add --no-cache wget ca-certificates && \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk && \
+    apk add --no-cache glibc-2.35-r1.apk && \
+    rm glibc-2.35-r1.apk
+
+# 下载 TinyMediaManager
 RUN \
     mkdir -p /defaults && \
     wget ${TMM_URL} -O /defaults/tmm.tar.xz
 
-# Install dependencies.
-RUN apk add --no-cache libmediainfo ttf-dejavu bash zenity tar zstd fontconfig xz
+# 安装依赖项
+RUN apk add --no-cache libmediainfo ttf-dejavu bash zenity tar zstd fontconfig xz zlib
 
+# 修复 Java Segmentation Fault (由于我们使用的是 glibc 兼容层，仍可能需要此修复)
+RUN mkdir -p /usr/glibc-compat/lib && \
+    cp /usr/lib/libz.so.1 /usr/glibc-compat/lib/ && \
+    /usr/glibc-compat/sbin/ldconfig || ldconfig || true
 
-# Fix Java Segmentation Fault on alpine-3.12-glibc
-# Use Alpine's zlib instead of downloading from Arch (which may be too new)
-RUN apk add --no-cache zlib && \
-    cp /lib/libz.so.1* /usr/glibc-compat/lib/ && \
-    /usr/glibc-compat/sbin/ldconfig
-
-# Maximize only the main/initial window.
-# It seems this is not needed for TMM 3.X version.
-#RUN \
-#    sed-patch 's/<application type="normal">/<application type="normal" title="tinyMediaManager \/ 3.0.2">/' \
-#        /etc/xdg/openbox/rc.xml
-
-# Generate and install favicons.
-# Note: Commented out as the GitLab URL may be inaccessible or cause build failures.
-# If you need a custom icon, uncomment and update the URL to a reliable source.
-# RUN \
-#     APP_ICON_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/raw/45f9c702615a55725a508523b0524166b188ff75/AppBundler/tmm.png && \
-#     install_app_icon.sh "$APP_ICON_URL"
-
-
-# Install Chinese fonts
+# 安装中文字体 (文泉驿正黑)
 RUN wget -O /tmp/font.tar.gz http://downloads.sourceforge.net/wqy/wqy-zenhei-0.9.45.tar.gz && \
     tar -xzvf /tmp/font.tar.gz -C /tmp/ && \
     mkdir -p /usr/share/fonts/truetype/wqy && \
@@ -51,25 +41,28 @@ RUN wget -O /tmp/font.tar.gz http://downloads.sourceforge.net/wqy/wqy-zenhei-0.9
     fc-cache -f -v && \
     rm -rf /tmp/font.tar.gz /tmp/wqy-zenhei
 
-# Add files.
+# 添加文件
 COPY rootfs/ /
 COPY VERSION /
 
-# Fix line endings (CRLF -> LF) and set execute permissions for scripts
-# This is needed when building on Windows
-RUN find /etc/cont-init.d -type f -exec sed -i 's/\r$//' {} \; && \
+# 修复换行符 (CRLF -> LF) 并为脚本设置执行权限
+# 同时创建 /usr/bin/with-contenv 兼容性脚本 (因为新版 baseimage 移除了它，但 tmm.sh 需要它)
+RUN echo '#!/bin/sh' > /usr/bin/with-contenv && \
+    echo 'exec "$@"' >> /usr/bin/with-contenv && \
+    chmod +x /usr/bin/with-contenv && \
+    find /etc/cont-init.d -type f -exec sed -i 's/\r$//' {} \; && \
     find /etc/cont-init.d -type f -exec chmod +x {} \; && \
     if [ -f /startapp.sh ]; then sed -i 's/\r$//' /startapp.sh && chmod +x /startapp.sh; fi
 
-# Set environment variables.
+# 设置环境变量
 ENV APP_NAME="TinyMediaManager" \
     S6_KILL_GRACETIME=8000
 
-# Define mountable directories.
+# 定义可挂载目录
 VOLUME ["/config"]
 VOLUME ["/media"]
 
-# Metadata.
+# 元数据
 LABEL \
     org.label-schema.name="tinymediamanager" \
     org.label-schema.description="Docker container for TinyMediaManager" \
