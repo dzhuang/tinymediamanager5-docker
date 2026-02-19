@@ -5,7 +5,7 @@
 FROM jlesage/baseimage-gui:alpine-3.12-glibc
 
 # Define software versions.
-ARG TMM_VERSION=5.2.4
+ARG TMM_VERSION=5.2.6
 
 # Define software download URLs.
 ARG TMM_URL=https://release.tinymediamanager.org/v5/dist/tinyMediaManager-${TMM_VERSION}-linux-amd64.tar.xz
@@ -20,7 +20,7 @@ RUN \
     wget ${TMM_URL} -O /defaults/tmm.tar.xz
 
 # Install dependencies.
-RUN apk add --no-cache libmediainfo ttf-dejavu bash zenity tar zstd fontconfig xz
+RUN apk add --no-cache libmediainfo ttf-dejavu bash zenity tar zstd fontconfig xz imagemagick
 
 
 # Fix Java Segmentation Fault on alpine-3.12-glibc
@@ -36,11 +36,27 @@ RUN apk add --no-cache zlib && \
 #        /etc/xdg/openbox/rc.xml
 
 # Generate and install favicons.
-# Note: Commented out as the GitLab URL may be inaccessible or cause build failures.
-# If you need a custom icon, uncomment and update the URL to a reliable source.
-# RUN \
-#     APP_ICON_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/raw/45f9c702615a55725a508523b0524166b188ff75/AppBundler/tmm.png && \
-#     install_app_icon.sh "$APP_ICON_URL"
+# To use custom icons, update the URLs below.
+ARG APP_PNG_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/raw/45f9c702615a55725a508523b0524166b188ff75/AppBundler/tmm.png
+ARG APP_SVG_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/-/raw/cd540533dc88af6152f3b2db5b353b2034f8cd72/AppBundler/svg/logo2.svg
+ARG APP_ICON_URL=https://gitlab.com/tinyMediaManager/tinyMediaManager/-/raw/f6aa4ebe280ace25d7139e4e0f78f71ecd28a269/AppBundler/tmm.ico
+RUN mkdir -p /tmp/icons && \
+    mkdir -p /opt/novnc/images/icons && \
+    # Download and install PNG icons
+    wget ${APP_PNG_URL} -O /tmp/icons/master.png && \
+    cp /tmp/icons/master.png /opt/novnc/images/icons/master_icon.png && \
+    convert /tmp/icons/master.png -resize 16x16 /opt/novnc/images/icons/favicon-16x16.png && \
+    convert /tmp/icons/master.png -resize 32x32 /opt/novnc/images/icons/favicon-32x32.png && \
+    convert /tmp/icons/master.png -resize 150x150 /opt/novnc/images/icons/mstile-150x150.png && \
+    convert /tmp/icons/master.png -resize 192x192 /opt/novnc/images/icons/android-chrome-192x192.png && \
+    convert /tmp/icons/master.png -resize 256x256 /opt/novnc/images/icons/android-chrome-256x256.png && \
+    convert /tmp/icons/master.png -resize 180x180 /opt/novnc/images/icons/apple-touch-icon.png && \
+    # Download and install SVG icon
+    wget ${APP_SVG_URL} -O /opt/novnc/images/icons/safari-pinned-tab.svg && \
+    # Download and install ICO icon
+    wget ${APP_ICON_URL} -O /opt/novnc/images/icons/favicon.ico && \
+    # Clean up
+    rm -rf /tmp/icons
 
 
 # Install Chinese fonts
